@@ -1,0 +1,18 @@
+@-moz-document url(chrome://browser/content/browser.xhtml) {
+	/* tabs on bottom of window */
+	#navigator-toolbox { -moz-box-ordinal-group: 10; }
+	#titlebar { -moz-box-ordinal-group: 10; }
+	.urlbarView {
+		top: unset !important;
+		bottom: 69px !important;
+		box-shadow: none !important;
+	}
+	.search-one-offs { display: none !important; }
+	.tab-background { border-top: none !important; }
+	#navigator-toolbox::after { border: none; }
+	#TabsToolbar .tabbrowser-arrowscrollbox,
+	#tabbrowser-tabs, .tab-stack { min-height: 28px !important; }
+	.tabbrowser-tab { font-size: 90%; }
+	.tab-content { padding: 0 5px; }
+	.tab-close-button .toolbarbutton-icon { width: 12px !important; height: 12px !important; }
+}
