@@ -41,10 +41,6 @@ bindsym $mod+Shift+q kill
 bindsym $mod+d exec rofi -show drun
 # lock
 bindsym $mod+q exec i3lock-fancy
-# There also is the (new) i3-dmenu-desktop which only displays applications
-# shipping a .desktop file. It is a wrapper around dmenu, so you need that
-# installed.
-# bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
 
 # change focus
 bindsym $mod+h focus left
@@ -172,8 +168,8 @@ bar {
     # status_command conky -c /home/lieh/.config/conky/config
     status_command /home/lieh/.config/conky/bin/jconky
     tray_output primary
-    # tray_output none
-    strip_workspace_numbers no
+#     # tray_output none
+#     strip_workspace_numbers no
     colors {
         background #10101000
         statusline #FFFFFF
@@ -191,7 +187,7 @@ bar {
 exec --no-startup-id xset -dpms
 
 # Autostart begin
-# exec --no-startup-id xcompmgr -FCf -nc -t -5 &
+exec --no-startup-id xcompmgr -FCf -nc -t -5 &
 # i3bar网络管理图标
 exec --no-startup-id nm-applet
 # 启动输入法-i3bar输入法图标
