@@ -1,0 +1,21 @@
+out_to_x no
+out_to_console yes
+background no
+double_buffer no
+update_interval 1
+total_run_times 0
+override_utf8_locale no
+short_units yes
+if_up_strictness address
+cpu_avg_samples 2
+
+TEXT
+[
+{ "full_text" : "${fs_used /}/${fs_size}" , "color" : "\#FF9D17" },
+{ "full_text" : ${if_up enp0s31f6}"up ${upspeed enp0s31f6}/s down ${downspeed enp0s31f6}/s"${else}""${endif}, "color" : "\#94F397" },
+{ "full_text" : ${if_up wlo1}"up ${upspeed wlo1}/s down ${downspeed wlo1}/s"${else}""${endif}, "color" : "\#94F397" },
+{ "full_text" : "CPU ${cpu cpu0}%" , "color" : "\#8BC3E7" },
+{ "full_text" : "RAM ${mem}" , "color" : "\#B987D9" },
+{ "full_text" : "${time %Y/%m/%d %A}" , "color" : "\#ff797b" },
+{ "full_text" : "${time %H:%M}" , "color" : "\#8BADF9" }
+],
