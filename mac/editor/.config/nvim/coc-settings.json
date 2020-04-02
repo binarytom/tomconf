@@ -1,3 +1,4 @@
 {
-  "rust-analyzer.enableCargoWatchOnStartup": "disabled"
+  "rust-analyzer.cargo-watch.enable": false,
+  "rust-analyzer.serverPath": "/Users/lieh/.cargo/bin/rust-analyzer"
 }
