@@ -44,6 +44,10 @@ if test -f /usr/share/autojump/autojump.fish;
 	source /usr/share/autojump/autojump.fish;
 end
 
+if [ -e /Users/lieh/.config/fish/nvm-wrapper/nvm.fish ];
+	source /Users/lieh/.config/fish/nvm-wrapper/nvm.fish
+end
+
 function ssh
 	switch $argv[1]
 	case "*.amazonaws.com"
