@@ -8,7 +8,7 @@ let mapleader = "\<Space>"
 " Load vundle
 set nocompatible
 filetype off
-set rtp+=~/Project/others/base16/builder/templates/vim/
+set rtp+=~/.config/base16/templates/vim/
 call plug#begin('~/.vim/plugged')
 
 " Load plugins
@@ -305,8 +305,8 @@ map L $
 " Neat X clipboard integration
 " ,p will paste clipboard into buffer
 " ,c will copy entire buffer into clipboard
-noremap <leader>p :read !xsel --clipboard --output<cr>
-noremap <leader>c :w !xsel -ib<cr><cr>
+noremap <leader>p :read !xclip -selection clipboard -o<cr>
+noremap <leader>c :w !xclip -selection clipboard<cr><cr>
 
 " <leader>s for Rg search
 noremap <leader>s :Rg
