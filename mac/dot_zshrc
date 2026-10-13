@@ -1,0 +1,21 @@
+# shellcheck shell=bash
+
+if command -v fnm >/dev/null 2>&1; then
+	eval "$(fnm env --use-on-cd --shell zsh)"
+fi
+
+# History management
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=5000
+# Zsh reads this variable when persisting history; it is not referenced as a
+# normal shell variable in this file.
+# shellcheck disable=SC2034
+SAVEHIST=5000
+setopt append_history hist_ignore_all_dups hist_ignore_space
+
+# Set up fzf key bindings and fuzzy completion
+if command -v fzf >/dev/null 2>&1; then
+	# fzf generates shell code dynamically for the installed version.
+	# shellcheck disable=SC1090
+	source <(fzf --zsh)
+fi

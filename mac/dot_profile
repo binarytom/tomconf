@@ -1,0 +1,14 @@
+# shellcheck shell=bash
+
+for rustup_bin in /opt/homebrew/opt/rustup/bin /usr/local/opt/rustup/bin; do
+	if [ -d "$rustup_bin" ]; then
+		export PATH="$rustup_bin:$PATH"
+	fi
+done
+export PATH="$HOME/.cargo/bin:$PATH"
+unset rustup_bin
+
+if [ -f "$HOME/.cargo/env" ]; then
+	# shellcheck source=/dev/null
+	. "$HOME/.cargo/env"
+fi

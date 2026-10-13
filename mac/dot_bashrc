@@ -1,0 +1,29 @@
+# shellcheck shell=bash
+
+for rustup_bin in /opt/homebrew/opt/rustup/bin /usr/local/opt/rustup/bin; do
+	if [ -d "$rustup_bin" ]; then
+		export PATH="$rustup_bin:$PATH"
+	fi
+done
+export PATH="$HOME/.cargo/bin:$PATH"
+unset rustup_bin
+
+if command -v fnm >/dev/null 2>&1; then
+	eval "$(fnm env --use-on-cd --shell bash)"
+fi
+
+if [ -f "$HOME/.cargo/env" ]; then
+	# shellcheck source=/dev/null
+	. "$HOME/.cargo/env"
+fi
+
+# History management
+export HISTCONTROL=ignoreboth
+export HISTSIZE=5000
+export HISTFILESIZE=5000
+export HISTIGNORE="clear:bg:fg:cd:cd -:cd ..:exit:date:w:* --help:ls:l:ll:lll"
+
+# Set up fzf key bindings and fuzzy completion
+if command -v fzf >/dev/null 2>&1; then
+	eval "$(fzf --bash)"
+fi

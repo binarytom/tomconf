@@ -1,0 +1,11 @@
+{{ if eq .chezmoi.hostname "binarytommini" -}}
+[https]
+	proxy = socks5://127.0.0.1:7890
+[http]
+	proxy = socks5://127.0.0.1:7890
+{{ end -}}
+[user]
+	name = binarytom
+	email = lieh_666@foxmail.com
+[credential]
+	helper = osxkeychain
