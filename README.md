@@ -36,6 +36,11 @@ cd tomconf
 Homebrew 或 Xcode 安装过程中可能要求确认或管理员密码。脚本不会执行
 `brew bundle cleanup`，所以不会删除机器上已有的其他软件包。
 
+默认安装采用 best-effort 模式：Homebrew 软件包、Rust、Node.js、LaTeX、Alacritty
+和 chezmoi 分成独立步骤。某一步失败时会打印原因、记录到末尾汇总并继续执行；再次
+运行脚本只会补齐缺少的部分。若 Homebrew 本身无法初始化，依赖它的步骤会整体跳过，
+但已有的 chezmoi 仍会尝试应用配置。`--check` 保持严格检查，缺少必需工具时返回失败。
+
 只检查依赖、不安装或应用任何内容：
 
 ```sh
@@ -65,6 +70,28 @@ chezmoi apply --source "$PWD"
 ```
 
 `diff` 只预览；确认无误后再运行 `apply`。`server/` 不由此脚本安装或应用。
+
+### Rust 链接错误
+
+如果安装 `proximity-sort` 时出现 `tapi error: malformed file` 或
+`unknown architecture arm64e.x1`，说明当前 Apple linker 与所选 macOS SDK 不匹配。
+安装脚本会在每台目标机器上重新检测，并优先使用已经安装、与当前 macOS 主版本
+一致的 SDK；如果链接预检仍然失败，会跳过这个可选工具并继续安装，其余 Neovim
+功能不受影响。
+
+可以用下面的命令检查当前状态：
+
+```sh
+xcode-select -p
+xcrun --sdk macosx --show-sdk-path
+xcrun --sdk macosx --show-sdk-version
+pkgutil --pkg-info=com.apple.pkg.CLTools_Executables
+```
+
+若仍然失败，请通过“系统设置 → 通用 → 软件更新”安装适用于当前 macOS 的最新
+Command Line Tools，或从 [Apple Developer](https://developer.apple.com/documentation/xcode/installing-the-command-line-tools/)
+下载对应版本，然后重新运行
+`./install.sh`。不建议手工删除单个 SDK 目录。
 
 ## 日常操作
 
