@@ -135,54 +135,55 @@ function fish_prompt
 end
 
 function fish_greeting
-	set_color --bold
-	echo "System"
-	set_color green
-	printf "  OS: %s\n" (uname -sr)
-	printf "  Hostname: %s\n" (hostname)
-	printf "  Uptime: %s\n" (string trim -- (uptime))
-	printf "  Root disk: %s\n" (string trim -- (df -h / | tail -n 1))
-	echo
-
-	set r (random 0 100)
-	if [ $r -lt 5 ] # only occasionally show backlog (5%)
-		echo -e " \e[1mBacklog\e[0;32m"
-		set_color blue
-		echo "  [project] <description>"
-		echo
+	# Keep the greeting useful at a glance: uptime excludes users and load averages,
+	# while disk usage shows only the three values relevant during normal work.
+	set -l raw_uptime (string trim -- (uptime))
+	set -l uptime_summary (string replace -r '^.*? up +' '' -- $raw_uptime)
+	set uptime_summary (string replace -r ', +[0-9]+ users?.*$' '' -- $uptime_summary)
+	if test "$uptime_summary" = "$raw_uptime"
+		set uptime_summary unavailable
 	end
+	set -l root_disk (string split -n ' ' -- (df -h / | tail -n 1))
 
+	echo
+	set_color brblack
+	printf '  ╭─ '
+	set_color --bold cyan
+	printf '%s\n' (hostname -s)
+
+	set_color brblack
+	printf '  │  '
 	set_color normal
-	echo -e " \e[1mTODOs\e[0;32m"
-	echo
-	if [ $r -lt 10 ]
-		# unimportant, so show rarely
-		set_color cyan
-		# echo "  [project] <description>"
-	end
-	if [ $r -lt 25 ]
-		# back-of-my-mind, so show occasionally
-		set_color green
-		# echo "  [project] <description>"
-	end
-	if [ $r -lt 50 ]
-		# upcoming, so prompt regularly
-		set_color yellow
-		# echo "  [project] <description>"
-	end
+	printf '%s\n' (uname -sr)
 
-	# urgent, so prompt always
-	set_color red
-	# echo "  [project] <description>"
+	set_color brblack
+	printf '  │  up      '
+	set_color normal
+	printf '%s\n' $uptime_summary
 
-	echo
+	set_color brblack
+	printf '  ╰─ disk /  '
+	set_color normal
+	printf '%s used / %s  %s\n' $root_disk[3] $root_disk[2] $root_disk[5]
 
+	# An empty heading creates visual noise, so the TODO section only exists when
+	# the user has actually written something down.
 	if test -s ~/todo
-		set_color magenta
-		sed 's/^/ /' ~/todo
 		echo
+		set_color --bold yellow
+		echo '  TODO'
+		set_color normal
+		while read -l todo_item
+			if test -n "$todo_item"
+				set_color yellow
+				printf '  • '
+				set_color normal
+				printf '%s\n' $todo_item
+			end
+		end < ~/todo
 	end
 
 	set_color normal
+	echo
 end
 export PATH="$HOME/.local/bin:$PATH"
