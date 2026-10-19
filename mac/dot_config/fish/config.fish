@@ -37,10 +37,13 @@ for autojump_config in /opt/homebrew/share/autojump/autojump.fish /usr/local/sha
 end
 
 function ssh
+	if test (count $argv) -eq 0
+		/usr/bin/ssh
+		return $status
+	end
+
 	switch $argv[1]
-	case "*.amazonaws.com"
-		env TERM=xterm /usr/bin/ssh $argv
-	case "ubuntu@"
+	case "*.amazonaws.com" "ubuntu@*"
 		env TERM=xterm /usr/bin/ssh $argv
 	case "*"
 		/usr/bin/ssh $argv
@@ -67,11 +70,34 @@ end
 
 function remote_alacritty
 	# https://gist.github.com/costis/5135502
-	set fn (mktemp)
-	infocmp alacritty > $fn
-	scp $fn $argv[1]":alacritty.ti"
-	ssh $argv[1] tic "alacritty.ti"
-	ssh $argv[1] rm "alacritty.ti"
+	if test (count $argv) -ne 1
+		echo "Usage: remote_alacritty HOST" >&2
+		return 2
+	end
+
+	set -l terminfo_file (mktemp)
+	or return 1
+	infocmp alacritty > "$terminfo_file"
+	or begin
+		command rm -f "$terminfo_file"
+		return 1
+	end
+
+	# Preserve the first failure while still removing both temporary copies.
+	set -l result 0
+	scp "$terminfo_file" "$argv[1]:alacritty.ti"
+	or set result $status
+	if test $result -eq 0
+		ssh "$argv[1]" tic alacritty.ti
+		or set result $status
+		ssh "$argv[1]" rm alacritty.ti
+		set -l remote_cleanup_status $status
+		if test $remote_cleanup_status -ne 0; and test $result -eq 0
+			set result $remote_cleanup_status
+		end
+	end
+	command rm -f "$terminfo_file"
+	return $result
 end
 
 # Type - to move up to top parent dir which is a repository
@@ -186,4 +212,5 @@ function fish_greeting
 	set_color normal
 	echo
 end
-export PATH="$HOME/.local/bin:$PATH"
+
+fish_add_path --global "$HOME/.local/bin"

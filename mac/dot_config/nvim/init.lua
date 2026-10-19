@@ -494,10 +494,13 @@ require("lazy").setup({
 			vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
 			vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist)
 
-			-- Use LspAttach autocommand to only map the following keys
-			-- after the language server attaches to the current buffer
+			-- Attach buffer-local behavior only after a language server is ready.
+			-- The format group is created once so attaching another buffer does not
+			-- discard format-on-save callbacks that are already in use.
+			local user_lsp_config = vim.api.nvim_create_augroup('UserLspConfig', { clear = true })
+			local rust_format = vim.api.nvim_create_augroup('RustFormat', { clear = true })
 			vim.api.nvim_create_autocmd('LspAttach', {
-				group = vim.api.nvim_create_augroup('UserLspConfig', {}),
+				group = user_lsp_config,
 				callback = function(ev)
 					-- Enable completion triggered by <c-x><c-o>
 					vim.bo[ev.buf].omnifunc = 'v:lua.vim.lsp.omnifunc'
@@ -524,23 +527,34 @@ require("lazy").setup({
 					end, opts)
 
 					local client = vim.lsp.get_client_by_id(ev.data.client_id)
+					if not client then
+						return
+					end
 
-					-- TODO: find some way to make this only apply to the current line.
+					-- Inlay hints are intentionally disabled only for this buffer.
 					if client.server_capabilities.inlayHintProvider then
-					    vim.lsp.inlay_hint.enable(false, { bufnr = bufnr })
+						vim.lsp.inlay_hint.enable(false, { bufnr = ev.buf })
 					end
 
 					-- None of this semantics tokens business.
 					-- https://www.reddit.com/r/neovim/comments/143efmd/is_it_possible_to_disable_treesitter_completely/
 					client.server_capabilities.semanticTokensProvider = nil
 
-					-- format on save for Rust
-					if client.server_capabilities.documentFormattingProvider then
-						vim.api.nvim_create_autocmd("BufWritePre", {
-							group = vim.api.nvim_create_augroup("RustFormat", { clear = true }),
-							buffer = bufnr,
+					-- Rust uses rustfmt through rust-analyzer. Limit the callback to the
+					-- attached buffer and client so other formatters remain opt-in.
+					if client.name == 'rust_analyzer'
+						and client.server_capabilities.documentFormattingProvider then
+						vim.api.nvim_clear_autocmds({ group = rust_format, buffer = ev.buf })
+						vim.api.nvim_create_autocmd('BufWritePre', {
+							group = rust_format,
+							buffer = ev.buf,
 							callback = function()
-								vim.lsp.buf.format({ bufnr = bufnr })
+								vim.lsp.buf.format({
+									bufnr = ev.buf,
+									filter = function(format_client)
+										return format_client.id == client.id
+									end,
+								})
 							end,
 						})
 					end

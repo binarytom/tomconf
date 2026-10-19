@@ -343,7 +343,7 @@ check_installation() {
 
 	if find_homebrew; then
 		load_homebrew_environment
-		if "$BREW" bundle check --file="$BREWFILE"; then
+		if "$BREW" bundle check --no-upgrade --file="$BREWFILE"; then
 			:
 		else
 			status=1
@@ -418,3 +418,9 @@ fi
 
 print_summary
 printf 'Run ./install.sh --check at any time to verify the result.\n'
+
+# Best-effort installation means every independent step gets a chance to run,
+# not that callers should mistake an incomplete machine for a successful one.
+if [[ "${#FAILED_STEPS[@]}" -gt 0 ]]; then
+	exit 1
+fi
